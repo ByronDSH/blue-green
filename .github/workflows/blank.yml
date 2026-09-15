@@ -24,7 +24,7 @@
 
         - name: Ejecutar pruebas basicas
           run: |
-            python -c "import sys; sys.path.insert(0, '.'); from github.workflows.app import crear_servidor; print('Código válido')"
+            python -c "import sys; sys.path.insert(0, '.github/workflows'); from app import crear_servidor; print('Código válido')"
 
     cd:
       name: Despliegue Blue-Green

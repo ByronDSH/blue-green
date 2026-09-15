@@ -25,3 +25,50 @@
         - name: Ejecutar pruebas basicas
           run: |
             python -c "from app import crear_servidor; print('Código válido')"
+
+    cd:
+      name: Despliegue Blue-Green
+      runs-on: ubuntu-latest
+      needs: ci
+
+      steps:
+        - name: Descargar codigo
+          uses: actions/checkout@v4
+
+        - name: Configurar Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: "3.12"
+
+        - name: Iniciar version blue
+          run: |
+            python app.py --Version blue --puerto 8000 >blue.log
+            2>&1 &.
+            echo $! > blue.pid
+            sleep 2
+
+        - name: Iniciar version Green
+          run: |
+            python app.py --Version green --puerto 8001 >green.log
+            2>&1 &.
+            echo $! > green.pid
+            sleep 2
+
+        - name: Probar version Green
+          run: |
+            response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001)
+            if [ "$response" -ne 200 ]; then
+              echo "Error: La version Green no responde correctamente. Codigo de respuesta: $response"
+              exit 1
+            fi
+            echo "Version Green desplegada correctamente."
+
+        - name: Cambiar trafico a version Green
+          run: |
+            kill "$(cat blue.pid)"
+            sleep 1
+            python app.py --version green
+            --puerto 8000 >green.pid
+        - name: Probar version green en puerto 8000
+          run: |
+            respuesta = $(curl --fail --silent http://localhost:8000)

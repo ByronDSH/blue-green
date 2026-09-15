@@ -42,7 +42,7 @@
 
         - name: Iniciar version blue
           run: |
-            python .github/workflows/app.py --Version blue --puerto 8000 >blue.log
+            python .github/workflows/app.py --version blue --puerto 8000 >blue.log
             2>&1 &
             echo $! > blue.pid
             sleep 2

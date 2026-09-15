@@ -20,11 +20,11 @@
             python-version: "3.12"
 
         - name: Validar sintaxis de Python
-          run: python -m py_compile app.py
+          run: python -m py_compile .github/workflows/app.py
 
         - name: Ejecutar pruebas basicas
           run: |
-            python -c "from app import crear_servidor; print('Código válido')"
+            python -c "from .github.workflows.app import crear_servidor; print('Código válido')"
 
     cd:
       name: Despliegue Blue-Green
@@ -42,14 +42,14 @@
 
         - name: Iniciar version blue
           run: |
-            python app.py --Version blue --puerto 8000 >blue.log
+            python .github/workflows/app.py --Version blue --puerto 8000 >blue.log
             2>&1 &
             echo $! > blue.pid
             sleep 2
 
         - name: Iniciar version Green
           run: |
-            python app.py --Version green --puerto 8001 >green.log
+            python .github/workflows/app.py --Version green --puerto 8001 >green.log
             2>&1 &
             echo $! > green.pid
             sleep 2
@@ -67,7 +67,7 @@
           run: |
             kill "$(cat blue.pid)"
             sleep 1
-            python app.py --version green --puerto 8000 >green.pid
+            python .github/workflows/app.py --version green --puerto 8000 >green.pid
         - name: Probar version green en puerto 8000
           run: |
             respuesta=$(curl --fail --silent http://localhost:8000)
